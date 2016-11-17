@@ -1,9 +1,11 @@
 package com.example.telematica.uiappexample.models;
 
+import io.realm.RealmObject;
+
 /**
  * Created by franciscocabezas on 12/11/15.
  */
-public class Libro {
+public class Libro extends RealmObject {
 
     private int id;
     private String nombre;

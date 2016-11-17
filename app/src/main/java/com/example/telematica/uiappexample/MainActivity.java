@@ -1,8 +1,8 @@
 package com.example.telematica.uiappexample;
 
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -16,11 +16,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private Realm realm;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(String result) {
                 if(result != null){
-                    System.out.println(result);
+                    //tem.out.println(result);
 
                     // specify an adapter (see also next example)
                     mAdapter = new UIAdapter(getLista(result));
@@ -63,6 +68,13 @@ public class MainActivity extends AppCompatActivity {
         };
 
         task.execute();
+
+        realm = Realm.getDefaultInstance();
+        // ... Do something ...
+        //File outFile = this.getDatabasePath("default.realm");
+        //String outFileName = outFile.getPath();
+        //System.out.println(outFile);
+        savedata();
     }
 
     private List<Libro> getLista(String result){
@@ -82,6 +94,13 @@ public class MainActivity extends AppCompatActivity {
                 libro.setAutor(objeto.getInt("autor"));
 
                 listaLibros.add(libro);
+
+                realm.beginTransaction();
+                Libro places = realm.createObject(Libro.class); // Create a new object
+                places.setNombre(libro.getNombre());
+                places.setEditorial(libro.getEditorial());
+                places.setAutor(libro.getAutor());
+                realm.commitTransaction();
             }
             return listaLibros;
         } catch (JSONException e) {
@@ -89,4 +108,29 @@ public class MainActivity extends AppCompatActivity {
             return listaLibros;
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        realm.close();
+    }
+
+    private void savedata(){
+
+        RealmResults<Libro> results = realm.where(Libro.class)
+                //.equalTo("imagen", "soccer")
+                //.or()
+                //.equalTo("imagen", "tenis")   FILTRAJE
+                .findAll();
+
+        for (int i = 0; i < results.size(); i++) {
+            Libro u = results.get(i);
+
+            System.out.println(u.getNombre());
+
+        }
+    }
+
+
 }
